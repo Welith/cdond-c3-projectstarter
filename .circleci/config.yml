@@ -240,7 +240,7 @@ jobs:
   deploy-frontend:
     docker:
       # Select proper image
-      - image: amazon/aws-cli:latest
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run:
@@ -248,6 +248,12 @@ jobs:
           command: |
             yum update
             yum install -y tar gzip unzip curl
+      - run:
+          name: Install aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - attach_workspace:
           at: ~/
       - run:
@@ -270,8 +276,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      # Select proper image
-      - image: amazon/aws-cli:latest
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - add_ssh_keys:
@@ -280,10 +285,17 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum update
-            yum install -y tar gzip unzip curl
-            yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-            yum -y install ansible
+            sudo apt -y update
+            sudo apt install -y tar gzip curl unzip
+            sudo apt install -y software-properties-common
+            sudo apt install -y python3 python3-pip
+            python3 -m pip install --user ansible
+      - run:
+          name: Install aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - attach_workspace:
           at: ~/      
       - run:
