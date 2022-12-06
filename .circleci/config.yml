@@ -131,12 +131,15 @@ jobs:
   deploy-infrastructure:
     docker:
       # Select proper AWS image
-      - image: amazon/aws-cli
+      - image: amazon/aws-cli:latest
     steps:
       # Checkout github code
       - checkout
       # Install taz ang gzip
-      - run: yum install -y tar gzip
+      - run: 
+          name: Install infra dependencies
+          command: |
+            yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -156,9 +159,10 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            aws cloudformation list-exports --query \
-              "Exports[?Name==\`BackendPublicIP-${CIRCLE_WORKFLOW_ID:0:7}\`].Value" \
-              --no-paginate --output text >> ~/project/.circleci/ansible/inventory.txt
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> ~/project/.circleci/ansible/inventory.txt
             cat ~/project/.circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
@@ -166,24 +170,33 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment    
 
-#   configure-infrastructure:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Configure server
-#           command: |
-#             # Your code here
-#             exit 1
-#       # Here's where you will add some code to rollback on failure      
+  configure-infrastructure:
+    docker:
+      # Select proper image
+      - image: amazon/aws-cli:latest
+    steps:
+      - checkout
+      # Add the necessary SSH key fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - "13:f0:a0:cb:b1:3d:75:a7:cd:8b:79:0a:0b:d4:d0:66"
+      - run:
+          name: Install dependencies
+          command: |
+            yum update
+            yum install -y tar gzip unzip
+            yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+            yum -y install ansible
+      #Attach the workspace
+      - attach_workspace:
+          at: ~/
+      #We get the IP from the inv file and run ansible
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy_environment      
 
 #   run-migrations:
 #     docker:
