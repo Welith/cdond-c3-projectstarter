@@ -204,8 +204,8 @@ jobs:
       - destroy-environment      
 
   run-migrations:
-    docker:
-      - image: circleci/node:13.8.0
+      # Select proper image
+      - image: amazon/aws-cli:latest
     steps:
       - checkout
       - restore_cache:
@@ -215,6 +215,7 @@ jobs:
           name: Run migrations
           command: |
             cd backend
+            cat .env
             npm install
             npm run migrations > migrations_log.txt
             echo 'has been executed successfully.' >> migrations_log.txt
