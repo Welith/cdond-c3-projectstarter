@@ -203,7 +203,6 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment      
 
-
   run-migrations:
     docker:
       # Select proper image
