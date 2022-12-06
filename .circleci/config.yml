@@ -204,6 +204,7 @@ jobs:
       - destroy-environment      
 
   run-migrations:
+    docker:
       # Select proper image
       - image: amazon/aws-cli:latest
     steps:
