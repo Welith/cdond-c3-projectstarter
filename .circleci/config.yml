@@ -243,13 +243,13 @@ jobs:
       - image: amazon/aws-cli:latest
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/
       - run:
           name: Install dependencies
           command: |
             yum update
             yum install -y tar gzip unzip curl
+      - attach_workspace:
+          at: ~/
       - run:
           name: Get backend url
           command: |
@@ -277,8 +277,6 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "13:f0:a0:cb:b1:3d:75:a7:cd:8b:79:0a:0b:d4:d0:66"
-      - attach_workspace:
-          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -286,6 +284,8 @@ jobs:
             yum install -y tar gzip unzip curl
             yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
             yum -y install ansible
+      - attach_workspace:
+          at: ~/      
       - run:
           name: Deploy backend
           command: |
