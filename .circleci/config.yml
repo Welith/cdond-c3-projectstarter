@@ -204,14 +204,20 @@ jobs:
       - destroy-environment      
 
   run-migrations:
-    docker:
+      docker
       # Select proper image
-      - image: amazon/aws-cli:latest
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - restore_cache:
           keys: [backend-build]
       - ensure-backend-env-exists
+      - run:
+          name: Install aws-cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Run migrations
           command: |
