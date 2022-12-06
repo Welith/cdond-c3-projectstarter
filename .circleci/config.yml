@@ -204,7 +204,7 @@ jobs:
       - destroy-environment      
 
   run-migrations:
-      docker
+      docker:
       # Select proper image
       - image: circleci/node:13.8.0
     steps:
