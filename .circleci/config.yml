@@ -110,6 +110,8 @@ jobs:
             cd frontend
             npm install
             npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -119,10 +121,12 @@ jobs:
       - restore_cache:
           keys: [scan-backend]
       - run:
-          name: Backend-end tesscanningts
+          name: Backend-end scanning
           command: |
             cd backend
             npm install
+            npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
 #   deploy-infrastructure:
